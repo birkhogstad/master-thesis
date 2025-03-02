@@ -1,0 +1,42 @@
+---
+title: "Fase 5: Automatisere utrulling til produksjon"
+sidebar:
+  order: 5
+---
+
+![CI/CD Pipeline](../../../../../public/images/CICD/AutoProd.png)
+
+## To former for automatisert utrulling
+
+Når vi har bygget, testet og godkjent koden vår, er det på tide å utplassere den til produksjon. Det finnes to former for automatisert utrulling:
+
+![Forskjellen mellom Continuous Delivery og Continuous Deployment](../../../../../public/images/CICD/CD-diff.png)
+
+##### **Kontinuerlig distribusjon (Continuous Delivery)**:
+
+- **Ekstra sikkerhet**: Manuell godkjenning gir menneskelig innsyn før utrulling, noe som kan forhindre uønskede endringer i produksjon.
+- **Samsvar med regler**: Egnet for regulerte industrier som krever manuell gjennomgang og dokumentasjon.
+
+##### **Kontinuerlig utplassering (Continuous Deployment)**:
+
+- **Fullstendig automatisering**: Hver endring som passerer de automatiserte testene, blir automatisk rullet ut til produksjon.
+- **Rask tid til markedet**: Endringer blir raskt tilgjengelig for sluttbrukere.
+
+import SelectCorrect from "../../../../components/SelectCorrect.astro";
+
+<SelectCorrect 
+  question="Hva er fordelen med kontinuerlig utplassering (Continuous Deployment)?"
+  correct="Fullstendig automatisering og rask tid til markedet."
+  wrong1="Ekstra sikkerhet og samsvar med regler."
+  wrong2="Fullstendig automatisering og samsvar med regler."
+/>
+{/* <SelectCorrect
+  question="Hva er formålet med å automatisere utrulling til produksjon?"
+  correct="For å sikre at koden blir raskt og sikkert utplassert til produksjon."
+  wrong1="For å teste koden i et realistisk miljø før den rulles ut til produksjon."
+  wrong2="For å overvåke ytelsen og tilstanden til applikasjonen."
+/> */}
+
+import LikeThisPage from "../../../../components/LikeThisPage.astro";
+
+<LikeThisPage />

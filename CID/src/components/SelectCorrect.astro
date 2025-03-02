@@ -1,0 +1,155 @@
+---
+interface Props {
+  question: string;
+  correct: string;
+  wrong1: string;
+  wrong2: string;
+}
+
+const { question, correct, wrong1, wrong2 } = Astro.props;
+const answers = [correct, wrong1, wrong2];
+
+// Randomize order
+for (let i = answers.length - 1; i > 0; i--) {
+  const j = Math.floor(Math.random() * (i + 1));
+  [answers[i], answers[j]] = [answers[j], answers[i]];
+}
+---
+
+<select-correct data-correct={correct} data-wrong1={wrong1} data-wrong2={wrong2}>
+  <h3>Test deg selv!</h3>
+  <p>{question}</p>
+  <div class="answers">
+    {
+      answers.map((option) => {
+        return (
+          <button class="option">
+            <p>{option}</p>
+          </button>
+        );
+      })
+    }
+    <button class="reveal">Vis svar</button>
+    <button class="reset" hidden="hidden">Prøv igjen</button>
+  </div>
+</select-correct>
+
+<!-- Datadog RUM -->
+<script src="https://www.datadoghq-browser-agent.com/datadog-rum-us.js"></script>
+<script>
+  import { datadogRum } from "@datadog/browser-rum";
+
+  class Selection extends HTMLElement {
+    constructor() {
+      super();
+
+      const buttons = this.querySelectorAll('button.option') as NodeListOf<HTMLButtonElement>;
+      if (buttons == undefined) return;
+      const correctButton = this.dataset.correct;
+      const resetButton = this.querySelector('button.reset') as HTMLButtonElement;
+      if (resetButton == undefined) return;
+      resetButton.hidden = true;
+      const revealButton = this.querySelector('button.reveal') as HTMLButtonElement;
+      if (revealButton == undefined) return;
+
+      buttons.forEach((button) => {
+        button.addEventListener('click', (event) => {
+          const target = event.currentTarget as HTMLElement;
+          const isCorrect = target.textContent?.trim() === correctButton;
+          if (isCorrect) {
+            button.classList.add('correct');
+            datadogRum.addAction('correct', {
+              event_category: 'Quiz',
+              event_label: 'Correct answer',
+            });
+          } else {
+            button.classList.add('wrong');
+            datadogRum.addAction('wrong', {
+              event_category: 'Quiz',
+              event_label: 'Wrong answer',
+            });
+          }
+          buttons.forEach((btn) => (btn.disabled = true));
+          revealButton.disabled = true;
+          resetButton.hidden = false;
+        });
+      });
+
+      resetButton.addEventListener('click', () => {
+        buttons.forEach((btn) => {
+          btn.disabled = false;
+          btn.classList.remove('correct', 'wrong');
+        });
+        revealButton.disabled = false;
+        resetButton.hidden = true;
+      });
+
+      revealButton.addEventListener('click', () => {
+        buttons.forEach((btn) => {
+          const isCorrect = btn.textContent?.trim() === correctButton;
+          btn.classList.add(isCorrect ? 'correct' : 'wrong');
+        });
+        resetButton.hidden = false;
+      });
+    }
+  }
+
+  customElements.define('select-correct', Selection);
+</script>
+
+<style>
+  h3 {
+    margin-top: 2rem;
+  }
+
+  .correct {
+    /* styles for correct answer */
+    background-color: #538c55;
+  }
+
+  .wrong {
+    /* styles for wrong answers */
+    background-color: #c46059;
+  }
+  .answers {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 1rem;
+    row-gap: 2rem;
+  }
+
+  .option {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0rem !important;
+    padding: 1rem;
+  }
+
+  .option:disabled {
+    color: var(--sl-color-white);
+  }
+
+  .reveal,
+  .reset {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: fit-content;
+    margin-top: 0rem !important;
+    padding: 0.2rem;
+  }
+
+  button {
+    border-radius: 0.5rem;
+  }
+  /* Media query for smaller screens */
+  @media (max-width: 768px) {
+    .answers {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto;
+      row-gap: 1rem;
+    }
+  }
+</style>

@@ -1,0 +1,83 @@
+<like-this-page>
+  <div class="row">
+    <span>Var denne siden nyttig?</span>
+    <button class="like">👍</button>
+    <button class="dislike">👎</button>
+  </div>
+  <p class="thanks" hidden>Takk for tilbakemelding!</p>
+</like-this-page>
+
+<script>
+  import { datadogRum } from "@datadog/browser-rum";
+
+  class LikeThisPage extends HTMLElement {
+    constructor() {
+      super();
+      this.attachEventHandlers();
+    }
+
+    attachEventHandlers() {
+      const likeButton = this.querySelector('button.like') as HTMLButtonElement;
+      const dislikeButton = this.querySelector('button.dislike') as HTMLButtonElement;
+      const thanksMessage = this.querySelector('p.thanks') as HTMLParagraphElement;
+
+      if (!likeButton || !dislikeButton || !thanksMessage) {
+        console.error('Buttons or thanks message not found');
+        return;
+      }
+
+      const disableButtons = () => {
+        likeButton.disabled = true;
+        dislikeButton.disabled = true;
+        thanksMessage.hidden = false;
+      };
+
+      likeButton.addEventListener('click', () => {
+        console.log('Like button clicked');
+        datadogRum.addAction('like', {
+          event_category: 'Like',
+          event_label: 'Liked the page',
+          page: window.location.pathname // Current page URL
+        });
+        disableButtons();
+      });
+
+      dislikeButton.addEventListener('click', () => {
+        console.log('Dislike button clicked');
+        datadogRum.addAction('dislike', {
+          event_category: 'Dislike',
+          event_label: 'Disliked the page',
+          page: window.location.pathname //Current page URL
+        });
+        disableButtons();
+      });
+    }
+  }
+
+  customElements.define('like-this-page', LikeThisPage);
+</script>
+
+<style>
+  .row {
+    margin-top: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1.2rem;
+  }
+
+  button {
+    font-size: 1.2rem;
+    aspect-ratio: 1/1;
+    width: 2rem;
+    height: 2rem;
+    margin-top: 0 !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .thanks {
+    text-align: center;
+  }
+</style>
